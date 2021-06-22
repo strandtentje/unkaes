@@ -1,0 +1,33 @@
+@font-face {
+	font-family: "Avenir";
+	src: url("http://www.hilled.nl/Avenir.ttc") format('truetype');
+}
+
+td, p, h1, h2, input, a {
+	font-family: "Avenir", Avenir;
+	color: #924037;
+}
+
+html {
+	background-color: #ecd9ac;
+}
+
+table {
+	padding: 2%;
+}
+
+.flotr-labels, h1 {
+	display:none;
+}
+
+#grafiekbevatter {
+	width: 800px;
+	height: 600px;
+}
+
+.flotr-canvas {
+	left: -15px !important;
+    top: -9px !important;
+    width: 90vw !important;
+    height: auto !important;
+}
