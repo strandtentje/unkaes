@@ -12,16 +12,30 @@
 
 $mysqli = new mysqli("localhost", "unkaes", "unkaes", "unkaes");
 
-$stmt = $mysqli->prepare(<<<SQL
-	INSERT INTO gesprek(persoona, persoonb, datum)
+$nieuwereflectie = $mysqli->prepare(<<<SQL
+	INSERT INTO reflectie(naam, datum)
+	VALUES (?, NOW());
+SQL);
+
+$nieuwgesprek = $mysqli->prepare(<<<SQL
+	INSERT INTO gesprek(reflectieaid, reflectiebid, datum)
 	VALUES(?, ?, NOW());
 SQL);
 
-$persoona = htmlspecialchars($_POST["persoona"]);
-$persoonb = htmlspecialchars($_POST["persoonb"]);
 
-$stmt->bind_param("ss", $persoona, $persoonb);
-$stmt->execute();
+$nieuwereflectie->bind_param("s", $naam);
+$nieuwgesprek->bind_param("ii", $reflaid, $reflbid);
+
+$naam = htmlspecialchars($_POST["persoona"]);
+$nieuwereflectie->execute();
+$reflaid = $mysqli->insert_id;
+
+$naam = htmlspecialchars($_POST["persoonb"]);
+$nieuwereflectie->execute();
+$reflbid = $mysqli->insert_id;
+
+$nieuwgesprek->execute();
+
 
 header("Location: /");
 ?>
