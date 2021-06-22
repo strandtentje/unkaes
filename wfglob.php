@@ -2,7 +2,8 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Unknown Aesthetic</title>
+	<title>Unknown Aesthetics</title>
+	<link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
 
@@ -19,19 +20,21 @@ $mysqli = new mysqli("localhost", "unkaes", "unkaes", "unkaes");
 
 $stmt = $mysqli->prepare(<<<SQL
 	SELECT woord, acount, bcount 
-	FROM (SELECT woord, acount, bcount
+	FROM (SELECT woordenlijst.woord, acount, bcount
 		FROM (SELECT 
 				woord, 
-				COUNT(helfta.gesprekid) AS acount, 
-				COUNT(helftb.gesprekid) AS bcount,
-				COUNT(helfta.gesprekid) + COUNT(helftb.gesprekid) AS allcount
+				COUNT(helfta.gesprekid) * LENGTH(woord) AS acount, 
+				COUNT(helftb.gesprekid) * LENGTH(woord) AS bcount,
+				COUNT(helfta.gesprekid) * LENGTH(woord) + COUNT(helftb.gesprekid) * LENGTH(woord) AS allcount
 			FROM woord
 			LEFT JOIN gesprek AS helfta ON woord.reflectieid = helfta.reflectieaid
 			LEFT JOIN gesprek AS helftb ON woord.reflectieid = helftb.reflectiebid
 			GROUP BY woord
 			ORDER BY woord) AS woordenlijst
+		LEFT JOIN verbodenwoord ON woordenlijst.woord = verbodenwoord.woord		
+        WHERE verbodenwoordid IS NULL
 		ORDER BY allcount DESC
-		LIMIT 100) AS woordenlijst 
+		LIMIT 50) AS woordenlijst 
 	ORDER BY woord
 SQL);
 

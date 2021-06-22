@@ -2,7 +2,9 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Unknown Aesthetic</title>
+	<title>Unknown Aesthetics</title>
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<link rel="icon" href="favicon.jpg" sizes="16x16" type="image/png">
 </head>
 <body>
 
@@ -52,14 +54,18 @@ while($row = $result->fetch_assoc()) {
 		<tr>
 			<td><a href="/reflectie.php?id={$ra}">{$pa}'s reflectie</a></td>
 			<td><a href="/reflectie.php?id={$rb}">{$pb}'s reflectie</a></td>
-			<td><a href="/data.php?id={$id}">focus</a></td>
+			<td><a href="/wfglob-graph.php?id={$id}&resolutie=17">focus</a></td>
+			<td> <form method="post" action="/deletegesprek.php">
+	<input type="hidden" name="id" value="{$id}">
+	<input type="submit" value="Gesprek Verwijderen"></form>
+	</td>
 		</tr>
 	HTML;
 }
 ?>
 </table>
 
-<h2>Overzichtjes</h2>
+<h2>Overzicht</h2>
 <a href="/wfglob.php">Woordfrequentie Globaal</a>
 
 </body>
