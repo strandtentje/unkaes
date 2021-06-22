@@ -16,13 +16,18 @@ $mysqli = new mysqli("localhost", "unkaes", "unkaes", "unkaes");
 
 <h1>Woordfrequentie globaal</h1>
 <div id="grafiekbevatter"></div>
+<div id="knoppen">
+	<input type="range" min="0" max="100" value="10" onchange="speed=((this.value / 3.0) ^ (1.0 / 1.2)) / 2500.0">
+</div>
+<div id="teksten">
 <script type="text/javascript">
 	var tmpa = [];
 	var tmpb = [];
 	var adatas = [];
 	var bdatas = [];
 	var i = 0;
-
+	var teksten = [];
+	var speed = 0.01;
 <?php
 
 
@@ -56,14 +61,58 @@ from (
 ) as unsorted 
 order by woord;
 SQL);
-
 $stmt->bind_param("iii", $gesprekselect, $gesprekselect, $resolutie);
+
+$stmt2 = $mysqli->prepare(<<<SQL
+select gesprek.gesprekid as gid, ra.tekst as rat, rb.tekst as rbt
+from gesprek 
+join reflectie as ra on gesprek.reflectieaid = ra.reflectieid
+join reflectie as rb on gesprek.reflectiebid = rb.reflectieid
+where gesprekid = ?
+SQL
+);
+$stmt2->bind_param("i", $gesprekselect);
+
 $gespreksfocus = explode(",", $_GET["id"]);
 $resolutie = $_GET["resolutie"];
 
+$tekstcounter = 0;
+
+foreach ($gespreksfocus as $gesprekselect) {	
+	$stmt2->execute();
+	$teksten = $stmt2->get_result();
+
+	while($tekstrow = $teksten->fetch_assoc()) {
+		$sca=htmlspecialchars($tekstrow["rat"]);
+		$scb=htmlspecialchars($tekstrow["rbt"]);		
+		echo <<<HTML
+</script>
+<table id="tekst{$tekstcounter}">
+	<tr>
+		<td>
+			<pre>{$sca}</pre>
+		</td>
+		<td>
+			<pre>{$scb}</pre>
+		</td>
+	</tr>
+</table>
+
+<script type="text/javascript">
+HTML;
+
+		$tekstcounter++;
+	}
+}
+?>
+</script>
+</div>
+<script type="text/javascript">
+<?php
 foreach ($gespreksfocus as $gesprekselect) {	
 	$stmt->execute();
 	$result = $stmt->get_result();
+
 	$acountnotsmooth = [];
 	$bcountnotsmooth = [];
 	while($row = $result->fetch_assoc()) {
@@ -107,16 +156,23 @@ HTML;
 var grafiekbevatter = document.getElementById('grafiekbevatter');
 
 var graph;
-var walker = 0;
+var stalker = 0;
 
 setInterval(function() {
-	walker += 0.01;
+	stalker += speed;
+	walker = (
+		Math.sin(
+			2 * Math.PI * stalker + Math.PI
+		) + 2 * Math.PI * stalker) / (1.999 * Math.PI)
 	
 	var aorig = adatas[Math.floor(walker) % adatas.length];
 	var borig = bdatas[Math.floor(walker) % bdatas.length];
 	var atarg = adatas[Math.ceil(walker) % adatas.length];
 	var btarg = bdatas[Math.ceil(walker) % bdatas.length];
 
+	document.getElementById("tekst" + Math.floor(walker) % adatas.length).className = "outview";
+	document.getElementById("tekst" + Math.ceil(walker) % adatas.length).className = "inview";
+	
 	var orimul = Math.ceil(walker) - walker;
 	var tarmul = walker - Math.floor(walker);
 
@@ -134,7 +190,9 @@ setInterval(function() {
 		color: '#ecd9ac',
 		lines: {				
 			fillColor: '#82a476',
-			fill: true
+			fill: true,
+			fillOpacity: 1,
+			shadowSize: 0
 		}
 	}, {
 		data: bdata,
@@ -142,18 +200,38 @@ setInterval(function() {
 		color: '#ecd9ac',
 		lines: {				
 			fillColor: '#ec3e2e',
-			fill: true
+			fill: true,
+			fillOpacity: 1,
+			shadowSize: 0
 		}
 	}], {
 		yaxis : {
 			max : 25,
 			min : -25
+		},
+		grid: {
+			horizontalLines: false,
+			verticalLines: false
 		}
 	});
-}, 25);
+}, 35);
 
+grafiekbevatter.style.width = document.body.clientWidth * 0.9 + "px";
 
+window.onresize = function() {
+	grafiekbevatter.style.width = document.body.clientWidth * 0.9 + "px";
+};
 </script>
+
+<?php
+
+
+$stmt = $mysqli->prepare(<<<SQL
+
+SQL);
+
+
+?>
 
 </body>
 </html>
